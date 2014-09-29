@@ -1,12 +1,12 @@
 public class Sudoku {
 	/*
 	 *
-	 * API, TP n°2
+	 * PI2, TP n°2
 	 * Groupe 4
 	 * Binome : Serre Fanny, GAUDICHON Pierre
 	 *
 	 */
-	static final int n = 3 ;		// taille des regions
+	static final int n = 3 ; // taille des regions
 	/*
 	 * Terminologie
 	 *
@@ -63,7 +63,7 @@ public class Sudoku {
 		 * Resultat : dans m, v est present dans la ligne i
 		 *
 		 */
-		for (Int j = 0; j < m[i].length; j++) {
+		for (int j = 0; j < m[i].length; j++) {
 			if(m[i][j] == v) {
 				return true;
 			}
@@ -80,7 +80,7 @@ public class Sudoku {
 		 * Resultat : dans m, v est present dans la colonne j
 		 *
 		 */
-		for(Int i; i < m.length; i++) {
+		for(int i = 0; i < m.length; i++) {
 			if(m[i][j] == v) {
 				return true;
 			}
@@ -97,9 +97,11 @@ public class Sudoku {
 		 * Resultat : dans m, v est present dans la region contenant la case <i, j>
 		 *
 		 */
-		for(Int i_ = i - i%3; i_ < i_+n; i_++) {
-			for (Int j_ = j - i%3; i_ < i_+n; i_++) {
-				if(m[i_][j_] == v) {
+		i = i - i%n;
+		j = j - j%n;
+		for(int i2 = 0; i2 < n; i2++) {
+			for (int j2 = 0; j2 < n; j2++) {
+				if(m[i+i2][j+j2] == v) {
 					return true;
 				}
 			}
@@ -117,12 +119,13 @@ public class Sudoku {
 		 * r[v] indique si v peut etre place en <i, j>
 		 *
 		 */
-		boolean[] r = boolean[n^2 + 1];
+		boolean[] r = new boolean[(int) Math.pow(n, 2) + 1];
 		r[0] = false;
-		Int v = m[i][j];
-		for(Int k = 1; k < n^2; k++) {
-			r[k] != (presentLigne(m, v, i) || presentColonne(m, v, j) || presentRegion(m, v, i, j));
+		//int v = m[i][j];
+		for(int v = 1; v < Math.pow(n, 2)+1; v++) {
+			r[v] = !(presentLigne(m, v, i) || presentColonne(m, v, j) || presentRegion(m, v, i, j));
 		}
+		return r;
 	} // lesPossiblesEn
 
 	static String enClair (boolean[] t) {
@@ -152,14 +155,20 @@ public class Sudoku {
 		 *
 		 */
 		boolean[] r = lesPossiblesEn(m, i, j);
-		Int v = -1;
-		for(Int k = 0; k < m.length(); k++) {
-			if(v != -1) {
-				return -1;
-			} else {
-
+		int c = 0;
+		int v = -1;
+		for(int a = 0; a < r.length; a++) {
+			if(r[a]) {
+				c++;
+				v = a;
 			}
 		}
+		if(c == 1) {
+			return v;
+		} else {
+			return -1;
+		}
+		
 	} // toutSeul // PAS FINI
 
 	static void essais (String grille) {
@@ -179,18 +188,18 @@ public class Sudoku {
 		boolean changes = true;
 		while(changes) {
 			changes = false;
-			for(Int i = 0; i < m.length(); i++) {
-				for(Int j = 0; j < m.length(); j++) {
+			for(int i = 0; i < m.length; i++) {
+				for(int j = 0; j < m.length; j++) {
 					if(m[i][j] == 0){
-						Int t = toutSeul(m, i, j);
+						int t = toutSeul(m, i, j);
 						if(t != -1) {
 							m[i][j] = t;
 							System.out.println(
 								"On modifie la case ["
-								+ i + "," + j "] "
-								+ "par la valeur :"
+								+ i + "," + j + "] "
+								+ "par la valeur : "
 								+ t + "."
-								)
+								);
 							changes = true;
 						}
 					}
@@ -202,9 +211,37 @@ public class Sudoku {
 	} // essais
 
 	public static void test(String s, boolean t) {
+		/*
+		 * Prerequis :
+		 *  - s est une chaine
+		 *  - t est un boolean resultant d un test.
+		 * Resultat : affiche si le test reussit ou non.
+		 *
+		 */
 		if(!t) {
 			System.out.println("Failed : " + s);
+		} else {
+			System.out.println("Success : " + s);
 		}
+	}
+	
+	public static boolean arrayEquals(boolean[] a, boolean[] b) {
+		/*
+		 * Prerequis :
+		 *  - a est un tableau de boolean
+		 *  - b est un tableau de boolean
+		 * Resultat : les deux tableaux sont egaux.
+		 *
+		 */
+		if(a.length != b.length) {
+			return false;
+		}
+		for(int i = 0; i < a.length; i++) {
+			if(a[i] != b[i]) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	public static void main(String[] args) {
@@ -234,32 +271,73 @@ public class Sudoku {
 			"800 000 020   " ;
 
 		// TESTS
+		
+			int[][] m = aPartirDe(grille1);
+			int[][] m2 = aPartirDe(grille2);
 
 			// Partie 1
-			test("presentLine 1", presentLine(grille1, 0, 0) == true);
-			test("presentLine 2", presentLine(grille1, 0, 4) == true);
+			test("presentLigne 1", presentLigne(m, 4, 0) == true);
+			test("presentLigne 2", presentLigne(m, 2, 0) == false);
 
-			test("presentColone 1", presentColonne(grille1, 0, 0) == true);
-			test("presentColone 2", presentColonne(grille1, 0, 4) == true);
+			test("presentColonne 1", presentColonne(m, 1, 0) == true);
+			test("presentColonne 2", presentColonne(m, 5, 0) == false);
 
-			test("presentRegion 1", presentRegion(grille1, 0, 0, 0) == true);
-			test("presentRegion 2", presentRegion(grille1, 0, 4, 4) == true);
+			test("presentRegion 1", presentRegion(m, 4, 0, 0) == true);
+			test("presentRegion 2", presentRegion(m, 5, 0, 0) == false);
 
 			// Partie 2
-			// to complete
-			test("lesPossiblesEn 1", lesPossiblesEn(m, 0, 0) ==
-			     [false, false, false, false, false, false, false, false, false])
+			test("lesPossiblesEn 1", arrayEquals(lesPossiblesEn(m2, 0, 0),
+				new boolean[]{false, false, true, false, false, true, false, true, false, false}));
+			test("lesPossiblesEn 2", arrayEquals(lesPossiblesEn(m2, 0, 2),
+				new boolean[]{false, false, false, false, false, true, false, true, false, true}));
 
-			// to complete
-			test("toutSeul 1", toutSeul(m, 0, 0) == -1)
+			test("toutSeul 1", toutSeul(m, 0, 0) == -1);
+			test("toutSeul 2", toutSeul(m, 4, 2) == 1);
 
 		// END
 
-		essais(grille1) ;
-		essais(grille2) ;
+		essais(grille1);
+		essais(grille2);
 
-		// PAS FAIT :
-		//		la partie n != 3
+		/*
+		 * Pour que les algorithmes soient compatible avec n !=3, on a remplacé les occurences de 3 par des n.
+		 * Il suffit maintenant de changer la valeur de n par une autre valeur en debut du programme. 
+		 */
+		
+		/*
+		 * Tests pour n = 4.
+		 */
+		
+		/*String grille3 =
+				"0400 0010 0060 0000\n" +
+				"0070 9000 8000 0000\n" +
+				"1900 0860 0740 0000\n" +
+				"0000 0000 0000 0000\n" +
+				"                   \n" +
+				"2000 6900 0100 0000\n" +
+				"0300 4050 0900 0000\n" +
+				"0600 0170 0030 0000\n" +
+				"0000 0000 0000 0000\n" +
+				"                   \n" +
+				"9100 7500 0420 0000\n" +
+				"0080 0020 7000 0000\n" +
+				"0000 0000 0000 0000\n" +
+				"4000 3000 0800 0000  " ;
+		
+		essais(grille3);*/
+		
+		/*
+		 * Exception in thread "main" java.lang.StringIndexOutOfBoundsException: String index out of range: 281
+			at java.lang.String.charAt(String.java:658)
+			at Sudoku.aPartirDe(Sudoku.java:49)
+			at Sudoku.essais(Sudoku.java:185)
+			at Sudoku.main(Sudoku.java:324)
+
+		 */
+		
+		/*
+		 * On voit ici que la fonction aPartirDe n'est pas prevue pour fonctionner si n !=3.
+		 */
 	}
 
 }
